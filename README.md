@@ -383,7 +383,7 @@ void threadFunction(void *param) {
 
 This example is a thread pool. Say you have an operation that takes a variable amount of time to run. You want to run these operations on one or more worker threads. The operations are put in a queue, so you can queue up operations until a thread is available to run it. The queueing operation is fast, so it won't block the thread you call it from.
 
-There's more code to this [in Github](https://github.com/rickkas7/particle-threads/tree/master/test/07-thread-pool) as the thread pool is implemented as a class. However, this is how it's used:
+There's more code to this [in Github](https://github.com/rickkas7/particle-threads/tree/master/test/07-thread-pool) as the thread pool is implemented as a class in user firmware, not part of system firmware. However, this is how it's used:
 
 ```
 #include "Particle.h"
@@ -462,10 +462,10 @@ You can find more documentation in the source.
 
 - [spark\_wiring\_thread.h](https://github.com/particle-iot/firmware/blob/develop/wiring/inc/spark_wiring_thread.h) contains the headers for the Thread class.
 - [concurrent\_hal.h](https://github.com/particle-iot/firmware/blob/develop/hal/inc/concurrent_hal.h) contains the headers for the low-level functions.
-- [concurrent\_hal.cpp](https://github.com/particle-iot/firmware/blob/develop/hal/src/stm32f2xx/concurrent_hal.cpp) contains the implementations of the low-level functions so you can see how they map to FreeRTOS function.
+- [concurrent\_hal.cpp](https://github.com/particle-iot/firmware/blob/develop/hal/src/stm32f2xx/concurrent_hal.cpp) contains the implementations of the low-level functions so you can see how they map to FreeRTOS functions.
 - [FreeRTOS docs](https://www.freertos.org/a00106.html) are helpful as well.
 
-Note that if you are browsing the concurrent_hal not all functions are exported to user firmware. In particular, you cannot use these functions from user firmware:
+Note that if you are browsing the concurrent\_hal not all functions are exported to user firmware. In particular, you cannot use these functions from user firmware:
 
 - os\_condition\_variable
 - os\_semaphore
