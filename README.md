@@ -2,6 +2,8 @@
 
 [Threads](https://en.wikipedia.org/wiki/Thread_(computing)) allow concurrent execution of multiple bits of code. They're popular in desktop operating systems like Windows and in languages like Java. Threads have limited support in the Particle platform, but exist.
 
+Though the semantics are a bit different, you might use threads in the same way you would use separate processes in Unix as well.
+
 Updated versions of this document can be found [in Github](https://github.com/rickkas7/particle-threads).
 
 ### Say no to threads
@@ -14,7 +16,7 @@ While this is a thread tutorial, in most cases you can get by without threads, a
 
 If you look through the Windows or Java APIs, it's abundantly clear which API calls are thread-safe, because they are listed as MT-safe or not. The Particle APIs are generally not safe, but there's no single reference as to what is safe. 
 
-Every thread must have its own stack, that's how threads work. The problem is that there is only about 80K of free memory on a Photon or Electron. The stack is normally 6K. Having more than a few threads will eat up your memory in no time! 
+Every thread must have its own stack, that's how threads work. The problem is that there is only about 80 KB of free memory on a Photon or Electron. The stack is normally 6 KB. Having more than a few threads will eat up your memory in no time! 
 
 In Windows or Java, there is virtual memory so each thread can be allocated a 1 MB stack and not have to worry about running out of memory, even with a large number of threads.
 
@@ -36,9 +38,11 @@ A bit of background:
 
 - Threads are based on FreeRTOS (currently) but there is abstraction layer over it in case this changes.
 - Threads are preemptively scheduled.
-- A threads that yields will be called up to 1000 times per second (1 millisecond interval)
+- A thread that yields will be called up to 1000 times per second (1 millisecond interval)
 - Most API calls are not thread safe. 
 - Basic synchronization capabilities exist, including mutex, recursive mutex, and queues.
+- Most threads calls are not safe to use in an interrupt service routine. However you can use os\_queue\_put from an ISR.
+- The default worker thread stack size is 3K. (main loop is 6K bytes, and software timers are 1K).
 - Threads are not supported on the Spark Core.
 
 ### How fast does a thread run?
@@ -231,6 +235,8 @@ Serial output:
 
 Note that you must add WITH_LOCK in both your thread AND in the loop thread (and any software timers).
 
+Note: The [logging class](https://docs.particle.io/reference/firmware/#logging), such as Log.info, is MT safe and you can call it from multiple threads without a lock. It's much better to use that instead of directly writing to Serial.
+
 ### Using a mutex to block a thread
 
 One handy trick is to use a mutex to block your thread until something happens elsewhere. In this example, a SETUP/MODE button click handler can unblock the thread to make one run.
@@ -297,6 +303,8 @@ void threadFunction(void *param) {
 One problem with the hardware UART serial is limited buffer size. One workaround for this is to read it from a thread. In this example it reads the USB serial just because it's easier to test.
 
 The thread reads data from the serial port and buffers it until it gets a full line. Then it makes a copy of the data and puts it in a queue. The queue is read out of loop(), but the serial port is continuously read even if main is blocked.
+
+This is also handy on the Electron, as the main loop thread on the Electron is only called 100 times per second (vs. 1000 on the Photon).
 
 ```
 #include "Particle.h"
@@ -424,7 +432,7 @@ void buttonHandler() {
 }
 ```
 
-The important part is pool.callOnThread. This queues up a call and the code within the {} block is execute later.
+The important part is pool.callOnThread. This queues up a call and the code within the {} block is executed later.
 
 Here's a sample output:
 
