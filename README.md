@@ -2,6 +2,8 @@
 
 [Threads](https://en.wikipedia.org/wiki/Thread_(computing)) allow concurrent execution of multiple bits of code. They're popular in desktop operating systems like Windows and in languages like Java. Threads have limited support in the Particle platform, but exist.
 
+Updated versions of this document can be found [in Github](https://github.com/rickkas7/particle-threads).
+
 ### Say no to threads
 
 While this is a thread tutorial, in most cases you can get by without threads, and not using threads will make your life easier.
@@ -373,7 +375,7 @@ void threadFunction(void *param) {
 
 This example is a thread pool. Say you have an operation that takes a variable amount of time to run. You want to run these operations on one or more worker threads. The operations are put in a queue, so you can queue up operations until a thread is available to run it. The queueing operation is fast, so it won't block the thread you call it from.
 
-There's more code to this in the Github as the thread pool is implemented as a class. However, this is how it's used:
+There's more code to this [in Github](https://github.com/rickkas7/particle-threads/tree/master/test/07-thread-pool) as the thread pool is implemented as a class. However, this is how it's used:
 
 ```
 #include "Particle.h"
