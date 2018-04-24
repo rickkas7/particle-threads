@@ -16,7 +16,7 @@ While this is a thread tutorial, in most cases you can get by without threads, a
 
 If you look through the Windows or Java APIs, it's abundantly clear which API calls are thread-safe, because they are listed as MT-safe or not. The Particle APIs are generally not safe, but there's no single reference as to what is safe. 
 
-Every thread must have its own stack, that's how threads work. The problem is that there is only about 80 KB of free memory on a Photon or Electron. The stack is normally 6 KB. Having more than a few threads will eat up your memory in no time! 
+Every thread must have its own stack, that's how threads work. The problem is that there is only about 60 KB of free memory on a Photon or Electron. The stack is normally 6 KB. Having more than a few threads will eat up your memory in no time! 
 
 In Windows or Java, there is virtual memory so each thread can be allocated a 1 MB stack and not have to worry about running out of memory, even with a large number of threads.
 
@@ -38,7 +38,7 @@ A bit of background:
 
 - Threads are based on FreeRTOS (currently) but there is abstraction layer over it in case this changes.
 - Threads are preemptively scheduled.
-- A thread that yields will be called up to 1000 times per second (1 millisecond interval)
+- A thread that yields will be called up to 1000 times per second (1 millisecond interval).
 - Most API calls are not thread safe. 
 - Basic synchronization capabilities exist, including mutex, recursive mutex, and queues.
 - Most threads calls are not safe to use in an interrupt service routine. However you can use os\_queue\_put from an ISR.
@@ -297,6 +297,8 @@ void threadFunction(void *param) {
 }
 
 ```
+
+You should use a mutex instead a busy wait (testing for a condition in a while loop) whenever possible as mutexes are a fundamental and very efficient part of FreeRTOS. A thread blocked on a mutex doesn't use any CPU.
 
 ### Reading serial from a thread
 
